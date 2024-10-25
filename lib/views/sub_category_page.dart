@@ -41,19 +41,63 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
 
   // Pagination variables
   int currentPage = 0;
-  final int itemsPerPage = 4;
+  final int itemsPerPage = 6;
   bool isLoadingMore = false;
   bool hasMoreData = true;
 
-  @override
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _viewModel = Provider.of<SubcategoryViewModel>(context, listen: false);
+  //   selectedSubcategory = widget.subcategory;
+  //   currentImageUrls = [];
+
+  //   _loadMoreImages();
+  //   fetchLength(widget.category,widget.subcategory);
+  // }
+
+   bool isInitialLoading = true; 
+ bool isSubcategoryLoading = false;
+   @override
   void initState() {
     super.initState();
     _viewModel = Provider.of<SubcategoryViewModel>(context, listen: false);
     selectedSubcategory = widget.subcategory;
     currentImageUrls = [];
 
-    _loadMoreImages();
+    _initialLoad();
   }
+
+  Future<void> _initialLoad() async {
+    setState(() {
+      isInitialLoading = true;
+    });
+    await fetchLength(widget.category, widget.subcategory);
+    await _loadMoreImages();
+    setState(() {
+      isInitialLoading = false;
+    });
+  }
+
+ Future<void> _handleSubcategoryChange(String newSubcategory) async {
+    setState(() {
+      isSubcategoryLoading = true;
+      selectedSubcategory = newSubcategory;
+      currentPage = 0;
+      hasMoreData = true;
+      currentImageUrls = [];
+    });
+
+    await fetchLength(widget.category, newSubcategory);
+    await _loadMoreImages();
+
+    setState(() {
+      isSubcategoryLoading = false;
+    });
+  }
+
+ List<String> allImageUrls = [];
+
   @override
   Widget build(BuildContext context) {
     final themeViewModel = Provider.of<ThemeViewModel>(context);
@@ -113,6 +157,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                 if (index == 0) {
                   subCat = widget.category;
                 } else {
+                  
                   subCat = widget.subCategories[index - 1];
                 }
 
@@ -120,16 +165,21 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
 
                 return GestureDetector(
                   onTap: () {
+                   
                     if (index == 0) return;
-
-                    setState(() {
+  _handleSubcategoryChange(subCat);
+                      setState(() {
                       selectedSubcategory = subCat;
                       currentPage = 0;
                       hasMoreData = true;
                       currentImageUrls = [];
                     });
 
+                    fetchLength(widget.category, subCat);
                     _loadMoreImages();
+
+                 
+                    
                   },
                   child: Column(
                     children: [
@@ -208,7 +258,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                           fontSize: 13, color: topImageCountContainerText),
                     ),
                     Text(
-                      "${currentImageUrls.length} images",
+                      "${allImageUrls.length} images",
                       style: TextStyle(fontSize: 13,
                           color: topImageCountContainerText,
                           fontWeight: FontWeight.bold),
@@ -225,13 +275,20 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
           Expanded(
             child: Consumer<SubcategoryViewModel>(
               builder: (context, viewModel, child) {
-                if (viewModel.isLoading && currentImageUrls.isEmpty) {
-                  return Center(child: CircularProgressIndicator());
+                // if (viewModel.isLoading && currentImageUrls.isEmpty) {
+                //   return CircularProgressIndicator();
+                // }
+                 if (isInitialLoading || isSubcategoryLoading) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
                 }
 
                 if (viewModel.errorMessage != null) {
                   return Center(child: Text(viewModel.errorMessage!));
                 }
+
+
 
                 return NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
@@ -239,7 +296,6 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                         hasMoreData &&
                         scrollInfo.metrics.pixels ==
                             scrollInfo.metrics.maxScrollExtent) {
-                      // Load more images when reaching the bottom
                       _loadMoreImages();
                     }
                     return false;
@@ -253,7 +309,7 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
                       mainAxisSpacing: 4.0,
                       crossAxisSpacing: 4.0,
                       itemCount: currentImageUrls.length +
-                          (isLoadingMore ? 1 : 0), // Show loading indicator if loading more
+                          (isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == currentImageUrls.length) {
                           return Center(child: CircularProgressIndicator());
@@ -308,16 +364,15 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
       isLoadingMore = true;
     });
 
-    // Fetch the images from Firestore
     newImages  = await _fetchSubcategoryImages(
         widget.category, selectedSubcategory, currentPage, itemsPerPage);
 
     setState(() {
       if (newImages?.isEmpty??false) {
-        hasMoreData = false; // No more data to load
+        hasMoreData = false; 
       } else {
-        currentImageUrls.addAll(newImages!); // Add new images to the list
-        currentPage++; // Increment the current page
+        currentImageUrls.addAll(newImages!); 
+        currentPage++; 
       }
       isLoadingMore = false;
     });
@@ -326,7 +381,6 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
 
   Future<List<String>> _fetchSubcategoryImages(
       String category, String subcategory, int page, int limit) async {
-    // Fetch data from Firestore with pagination
     final doc = await FirebaseFirestore.instance
         .collection('categories')
         .doc(category)
@@ -353,4 +407,40 @@ class _SubcategoryPageState extends State<SubcategoryPage> {
 
     return [];
   }
+
+ 
+
+Future<void> fetchLength(String category, String subcategory) async {
+  
+ 
+  final doc = await FirebaseFirestore.instance
+      .collection('categories')
+      .doc(category)
+      .collection('subcategories')
+      .doc(subcategory)
+      .get();
+
+  if (doc.exists) {
+    List<dynamic> imagesData = doc.data()?['images'] ?? [];
+
+  setState(() {
+    
+      allImageUrls = imagesData
+        .where((imageMap) =>
+            imageMap is Map<String, dynamic> &&
+            imageMap.containsKey('url') &&
+            imageMap['url'] is String)
+        .map<String>((imageMap) => imageMap['url'] as String)
+        .toList();
+  });
+
+    print("Total images loaded: ${allImageUrls.length}");
+  } else {
+     allImageUrls.clear();
+    print("No images found.");
+  }
+}
+
+
+
 }

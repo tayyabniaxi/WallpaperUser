@@ -373,6 +373,8 @@ class _CategoryPageState extends State<CategoryPage> {
                                             },
                                           ),
                                         ),
+                                        SizedBox(height: 6,),
+                                          Divider(),
                                       ],
                                     );
                                   }

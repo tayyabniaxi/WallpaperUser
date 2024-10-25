@@ -10,7 +10,7 @@ class SubcategoryViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   int _currentPage = 0;
-  static const int _pageSize = 5; // Adjust the page size as needed
+  static const int _pageSize = 5;
 
   List<String> get imageUrls => _imageUrls;
   bool get isLoading => _isLoading;
@@ -18,7 +18,7 @@ class SubcategoryViewModel extends ChangeNotifier {
 
   // Fetch images based on page
   Future<void> fetchSubcategoryImages(String categoryId, String subcategoryId) async {
-    if (_isLoading) return; // Prevent multiple calls
+    if (_isLoading) return; 
 
     _setLoading(true);
     clearError();
