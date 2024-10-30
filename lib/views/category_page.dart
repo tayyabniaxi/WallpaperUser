@@ -1,13 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:new_wall_paper_app/provider/category-provider.dart';
-import 'package:new_wall_paper_app/theme/app_theme.dart';
 import 'package:new_wall_paper_app/utils/app-color.dart';
 import 'package:new_wall_paper_app/views/sub_category_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:new_wall_paper_app/views/sub_category_page.dart';
 import 'package:new_wall_paper_app/widgets/full_screen_image_page.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/theme_view_model.dart';
@@ -121,7 +118,7 @@ class _CategoryPageState extends State<CategoryPage> {
               ),
             ),
           ),
-          SizedBox(height: 7),
+          const SizedBox(height: 7),
           if (categoryProvider.subCategories.containsKey(categoryProvider.selectedCategory))
             Expanded(
               child: Column(
@@ -148,7 +145,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                       category: categoryProvider.selectedCategory,
                                       subcategory: subCategory,
                                       imageUrls: images,
-                                      isFavoriteList: [],
+                                      isFavoriteList: const [],
                                       subCategories: categoryProvider.subCategories[categoryProvider.selectedCategory]!,
                                     ),
                                   ),
@@ -317,7 +314,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                     category: categoryProvider.selectedCategory,
                                     subcategory: subCategory,
                                     imageUrls: images,
-                                    isFavoriteList: [],
+                                    isFavoriteList: const [],
                                     subCategories: categoryProvider.subCategories[categoryProvider.selectedCategory]!,
                                   ),
                                 ),
@@ -373,8 +370,8 @@ class _CategoryPageState extends State<CategoryPage> {
                                             },
                                           ),
                                         ),
-                                        SizedBox(height: 6,),
-                                          Divider(),
+                                        const SizedBox(height: 6,),
+                                          const Divider(),
                                       ],
                                     );
                                   }

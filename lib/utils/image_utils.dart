@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
@@ -39,14 +41,14 @@ class ImageUtils {
         // save the image to gallery and then show the snackbar
         await Gal.putImage(filePath).then(
           (value) {
-            _showSnackbar(context, 'Your image is saved');
+            showSnackbar(context, 'Your image is saved');
           },
         );
       } catch (e) {
-        _showSnackbar(context, 'Failed to download image: $e');
+        showSnackbar(context, 'Failed to download image: $e');
       }
     } else {
-      _showSnackbar(
+      showSnackbar(
           context, 'Storage permission is required to download images');
     }
   }
@@ -59,13 +61,13 @@ class ImageUtils {
 
     if (snapshot.docs.isEmpty) {
       firestore.collection('userFavorites').add({'url': imageUrl});
-      _showSnackbar(context, 'Image added to favorites');
+      showSnackbar(context, 'Image added to favorites');
     } else {
       firestore
           .collection('userFavorites')
           .doc(snapshot.docs.first.id)
           .delete();
-      _showSnackbar(context, 'Removed from favorites');
+      showSnackbar(context, 'Removed from favorites');
     }
   }
 
@@ -95,10 +97,10 @@ class ImageUtils {
         // Directly set the wallpaper using a platform channel
         _setWallpaperDirectly(context, filePath);
       } catch (e) {
-        _showSnackbar(context, 'Failed to set wallpaper: $e');
+        showSnackbar(context, 'Failed to set wallpaper: $e');
       }
     } else {
-      _showSnackbar(context, 'Storage permission is required to set wallpaper');
+      showSnackbar(context, 'Storage permission is required to set wallpaper');
     }
   }
 
@@ -118,18 +120,6 @@ class ImageUtils {
     }
   }
 
-  static void _showSnackbar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Center(child: Text(message)),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 75.0),
-        backgroundColor: const Color(0xFF7B39FD),
-        duration: const Duration(milliseconds: 1000),
-      ),
-    );
-  }
-
   static void _setWallpaperDirectly(
       BuildContext context, String filePath) async {
     try {
@@ -138,9 +128,21 @@ class ImageUtils {
       await methodChannel
           .invokeMethod('setWallpaperDirectly', {"filePath": filePath});
 
-      _showSnackbar(context, 'Wallpaper set successfully');
+      showSnackbar(context, 'Wallpaper set successfully');
     } catch (e) {
-      _showSnackbar(context, 'Failed to set wallpaper: $e');
+      showSnackbar(context, 'Failed to set wallpaper: $e');
     }
   }
+}
+
+void showSnackbar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Center(child: Text(message)),
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 75.0),
+      backgroundColor: const Color(0xFF7B39FD),
+      duration: const Duration(milliseconds: 1000),
+    ),
+  );
 }

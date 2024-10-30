@@ -100,6 +100,8 @@
 // home_state.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:new_wall_paper_app/views/wallpaper-manager.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeState extends ChangeNotifier {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -206,4 +208,6 @@ class HomeState extends ChangeNotifier {
     scrollController.dispose();
     super.dispose();
   }
+
+
 }

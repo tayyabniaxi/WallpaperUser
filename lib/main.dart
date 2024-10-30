@@ -4,6 +4,7 @@ import 'package:new_wall_paper_app/provider/category-provider.dart';
 import 'package:new_wall_paper_app/provider/categoryViewmodel-provider.dart';
 import 'package:new_wall_paper_app/provider/favorite_toggle.dart';
 import 'package:new_wall_paper_app/provider/home-content-provider.dart';
+import 'package:new_wall_paper_app/provider/image_show-full-screen-provider.dart';
 import 'package:new_wall_paper_app/provider/search-provider.dart';
 import 'package:provider/provider.dart';
 import 'viewmodels/subcategory_view_model.dart';
@@ -13,7 +14,7 @@ import 'package:google_api_availability/google_api_availability.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+// checkPlatformVersion();
   try {
     await Firebase.initializeApp();
   } catch (e) {
@@ -27,6 +28,7 @@ void main() async {
        ChangeNotifierProvider(create: (_) => SearchState()),
        ChangeNotifierProvider(create: (_) => HomeState()),
        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+       ChangeNotifierProvider(create: (_) => FullImageShowProvider()),
     ],
     child: const MyApp()));
 

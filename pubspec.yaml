@@ -53,6 +53,8 @@ dependencies:
   fluttertoast:
   image_picker:
   share_plus: 
+  flutter_wallpaper_manager: ^0.0.4
+
 
 dev_dependencies:
   flutter_test:

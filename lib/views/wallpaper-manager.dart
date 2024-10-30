@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_const, non_constant_identifier_names
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';

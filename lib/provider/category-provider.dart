@@ -1,10 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:new_wall_paper_app/views/wallpaper-manager.dart';
 
 class CategoryProvider extends ChangeNotifier {
-
-  
-
   // Variables
   final List<String> categories = [
     'Wallpaper',
@@ -68,8 +68,6 @@ class CategoryProvider extends ChangeNotifier {
     ],
   };
 
-  
-
   final Map<String, IconData> subCategoryIcons = {
     'AI': Icons.memory,
     'Gadgets': Icons.devices,
@@ -124,16 +122,20 @@ class CategoryProvider extends ChangeNotifier {
   List<String> get displayedSubCategories => _displayedSubCategories;
 
   // Methods
+
   void loadSubCategories(String category) {
     _selectedCategory = category;
     _displayedSubCategories = [];
     _currentPage = 0;
     loadMoreItems();
-    notifyListeners();
+    Future.microtask(() {
+      notifyListeners();
+    });
   }
 
   void loadMoreItems() {
-    if (_currentPage * itemsPerPage >= subCategories[_selectedCategory]!.length) {
+    if (_currentPage * itemsPerPage >=
+        subCategories[_selectedCategory]!.length) {
       return;
     }
 
@@ -145,23 +147,64 @@ class CategoryProvider extends ChangeNotifier {
           : endIndex,
     ));
     _currentPage++;
-    notifyListeners();
+    Future.microtask(() {
+      notifyListeners();
+    });
   }
 
-  Future<List<String>> fetchSubcategoryImages(String category, String subcategory) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('categories')
-        .doc(category)
-        .collection('subcategories')
-        .doc(subcategory)
-        .get();
+  Future<List<String>> fetchSubcategoryImages(
+      String category, String subcategory) async {
+    const int maxRetries = 5;
+    int attempt = 0;
+    List<String> images = [];
 
-    if (doc.exists) {
-      List<dynamic> imagesData = doc.data()?['images'] ?? [];
-      return imagesData.map((imageMap) => imageMap['url'] as String).toList();
+    while (attempt < maxRetries) {
+      try {
+        print("Attempt $attempt to fetch data from Firebase");
+        final doc = await FirebaseFirestore.instance
+            .collection('categories')
+            .doc(category)
+            .collection('subcategories')
+            .doc(subcategory)
+            .get();
+
+        if (doc.exists) {
+          print("Document found in Firebase.");
+          List<dynamic> imagesData = doc.data()?['images'] ?? [];
+          print("Images data: $imagesData");
+          images =
+              imagesData.map((imageMap) => imageMap['url'] as String).toList();
+          return images;
+        } else {
+          print("Document does not exist.");
+        }
+        break;
+      } on FirebaseException catch (e) {
+        if (e.code == 'unavailable') {
+          attempt++;
+          print("Firebase unavailable, retrying in ${2 * attempt} seconds...");
+          final delay = Duration(seconds: 2 * attempt);
+          await Future.delayed(delay);
+        } else {
+          print("FirebaseException: ${e.message}");
+          rethrow;
+        }
+      } catch (e) {
+        print("Unexpected error: $e");
+        rethrow;
+      }
     }
-    return [];
-  }
 
-  
+    print('Max retry attempts reached. Could not fetch subcategory images.');
+    return images;
+  }
+}
+
+void checkPlatformVersion() async {
+  try {
+    String? version = await WallpaperManager.platformVersion;
+    print('Platform version: $version');
+  } catch (e) {
+    print('Error: $e');
+  }
 }

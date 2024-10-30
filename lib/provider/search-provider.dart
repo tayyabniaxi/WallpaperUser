@@ -14,6 +14,7 @@ class SearchState extends ChangeNotifier {
   List<Map<String, dynamic>> get suggestedImages => _suggestedImages;
   bool get showSuggestions => _showSuggestions;
 
+
   Future<List<Map<String, dynamic>>> searchImages(String query) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
@@ -22,11 +23,13 @@ class SearchState extends ChangeNotifier {
           .where('name', isLessThanOrEqualTo: '$query\uf8ff')
           .get();
 
-      return querySnapshot.docs.map((doc) => {
-        'name': doc['name'],
-        'url': doc['url'],
-        'isPro': doc['isPro'],
-      }).toList();
+      return querySnapshot.docs
+          .map((doc) => {
+                'name': doc['name'],
+                'url': doc['url'],
+                'isPro': doc['isPro'],
+              })
+          .toList();
     } catch (e) {
       Fluttertoast.showToast(msg: 'Error searching images: $e');
       return [];

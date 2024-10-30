@@ -23,8 +23,14 @@ class HomeContent extends StatelessWidget {
   }
 }
 
-class HomeContentView extends StatelessWidget {
+class HomeContentView extends StatefulWidget {
   const HomeContentView({Key? key}) : super(key: key);
+
+  @override
+  State<HomeContentView> createState() => _HomeContentViewState();
+}
+
+class _HomeContentViewState extends State<HomeContentView> {
 
   @override
   Widget build(BuildContext context) {

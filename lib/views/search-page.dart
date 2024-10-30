@@ -65,7 +65,7 @@ class SearchImageContent extends StatelessWidget {
       ),
           body: GestureDetector(
             onTap: () {
-            // Remove focus when tapping outside the TextField
+           
             FocusScope.of(context).unfocus();
           },
           behavior: HitTestBehavior.opaque,
